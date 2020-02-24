@@ -34,3 +34,5 @@ else:
     exit(code=0)
 
 # todo: create a way to store new keys
+
+# todo: figure out a way to encrypt the secret key in memory

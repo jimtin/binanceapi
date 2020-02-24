@@ -164,3 +164,75 @@ def getaccountinfo(PublicKey, secretkey):
     print(accountinfo)
     print("##############################")
     return accountinfo
+
+
+# Get trading information about the account
+def getexchangeinfo():
+    apirequest = "https://api.binance.com/api/v3/exchangeInfo"
+    # No parameters or authentication required, so can use a simple python request
+    session = requests.session()
+    session.headers.update({'Accept': 'application/json'})
+    information = session.get(apirequest)
+    exchangeinfojson = information.text
+    exchangeinfo = json.loads(exchangeinfojson)
+    return exchangeinfo
+
+
+# Return exchange information to the screen in a more human readable format
+def getexchangeinfohumanreadable():
+    exchangeinfo = getexchangeinfo()
+    symbols = exchangeinfo["symbols"]
+    for crypto in symbols:
+        print(crypto["symbol"], crypto["baseAsset"])
+
+
+# Get information about the depth of the market
+def getmarketdepth(PublicKey, symbol, limit=500):
+    apirequest = "https://api.binance.com/api/v3/depth"
+    # Turn limit into a string
+    limit = str(limit)
+    # Construct the full api request
+    apirequest = apirequest + "?symbol=" + symbol + "&limit=" + limit
+    # The MarketData endpoint requires the PublicKey to work, however, no signature
+    session = requests.session()
+    session.headers.update({'Accept': 'application/json', 'X-MBX-APIKEY': PublicKey})
+    # Get market depth from binance
+    information = session.get(apirequest)
+    # Convert into json
+    marketdepth = json.loads(information.text)
+    return marketdepth
+
+
+# Get a list of the recent trades which were made
+def getrecenttrades(PublicKey, symbol, limit=500):
+    apirequest = "https://api.binance.com/api/v3/trades"
+    # Turn limit into a string
+    limit = str(limit)
+    # Construct the full api request
+    apirequest = apirequest + "?symbol=" + symbol + "&limit=" + limit
+    # The MarketData endpoint requires the PublicKey to work, however, no signature
+    session = requests.session()
+    session.headers.update({'Accept': 'application/json', 'X-MBX-APIKEY': PublicKey})
+    # Get recent trades from binance
+    information = session.get(apirequest)
+    # Convert into json
+    recenttrades = json.loads(information.text)
+    return recenttrades
+
+
+# Get 24 hour price change statistics for specified symbols
+def getpricechanges(symbol="ALL"):
+    apirequest = "https://api.binance.com/api/v3/ticker/24hr"
+    # Construct the apirequest based upon symbol provided
+    if symbol == "ALL":
+        apirequest = apirequest
+    else:
+        apirequest = apirequest + "&symbol=" + symbol
+    session = requests.session()
+    # Get 24 hour price change statistics for specified symbols
+    information = session.get(apirequest)
+    # Convert into json
+    pricechange = json.loads(information.text)
+    return pricechange
+
+
