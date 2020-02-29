@@ -4,6 +4,8 @@ import json
 import binancelibrary
 import splunk_as_a_database
 from time import sleep
+import datetime
+import coinbaselibrary
 
 
 # Global Variables
@@ -35,17 +37,21 @@ def main(BinanceFilepath="", SplunkSettings=""):
 
 # Function to start collecting data from binance for practice. Set to run each hour.
 def datagathering(binanceKeys, splunkSettings, timewindow):
+    #while 1:
     # First get data from binance
+    print("Getting binance data " + str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
     pricechangedata = binancelibrary.getpricechanges()
-    print("Sending data to Splunk")
-    for crypto in pricechangedata:
-        # turn crypto into a string to make it easier to convert to bytes
-        crypto = str(crypto)
-        # Send to splunk
-        splunk_as_a_database.splunkudpsender(crypto, splunkSettings)
-    # Then wait for 60 minutes before getting new ones
+    # Now send binance data to splunk
+    print("Sending binance data to Splunk")
+    sendtosplunk(pricechangedata, "binance", splunkSettings)
+    # Now get coinbase data
+    print("Getting coinbase data " + str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+    spotpricedata = coinbaselibrary.combinespotprices()
+    print(spotpricedata)
+    print("Sending coinbase data to splunk")
+    sendtosplunk(spotpricedata, "coinbase", splunkSettings)
     print("Sleeping for an hour now")
-    sleep(3600)
+
 
 # Function to get binance keys from the BinanceFilePath
 def getbinancekeys(filepath):
@@ -57,6 +63,24 @@ def getbinancekeys(filepath):
     # Create a dict with the keys
     Keys = keydata['binance']
     return Keys
+
+
+# Function to send data to Splunk and include the exchange it is from
+def sendtosplunk(data, exchange, splunksettings):
+    # Ensure the exchange is a string
+    exchange = str(exchange)
+    # Iterate through the data provided, adding in the exchange
+    for crypto in data:
+        # Add in the exchange
+        # print(crypto)
+        crypto.update({'exchange': exchange})
+        crypto.update({'DateTime': str(datetime.datetime.now())})
+        # Turn into json
+        exchangedata = json.dumps(crypto)
+        # Serialize the crypto object into a string
+        exchangedata = str(exchangedata)
+        # Now send joyfully to Splunk
+        splunk_as_a_database.splunkudpsender(exchangedata, splunksettings)
 
 
     # todo: create a live query mode using the python 'blessed' library
