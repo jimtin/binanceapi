@@ -1,0 +1,9 @@
+27 Feb 2020: Decided to try using postgresql for database. Normally would try splunk but this may offer a free alternative
+Total bust
+Now trying MySQL
+Got rid of all of that and went with my old favourite splunk
+
+29 Feb 2020: realised that I will also need coinbase data so that I can get a nice solid read on currencies
+
+01 Mar 2020: Splunk is so good. Make sure to include a quick walk through in setting up a non-privileged user
+
