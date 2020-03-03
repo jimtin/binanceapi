@@ -5,6 +5,8 @@ from time import sleep
 import xmltodict
 import requests
 from requests.auth import HTTPBasicAuth
+import urllib3
+
 
 # Use Splunks REST API as a database
 
@@ -41,6 +43,7 @@ def getsplunksettings(FilePath):
 
 # Query Splunk to get information
 def querysplunk(SearchQuery, FilePath):
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     # Ensure that SearchQuery is a string
     SearchQuery = str(SearchQuery)
     # Get splunk settings
@@ -50,26 +53,47 @@ def querysplunk(SearchQuery, FilePath):
     # Get the session key
     sessionkey = getsplunksessionkey(FilePath)
     data = {
-        "search": SearchQuery
+        "search": SearchQuery,
+        "ouput_mode": "json"
     }
     session = requests.session()
-    session.headers.update({"Content-Type": "application/json"})
     session.headers.update({'Authorization': 'Splunk ' + sessionkey})
     information = session.post(apirequest, data=data, verify=False)
     # The information returned is in xml, and I really just want the sessionkey, so convert
     information = xmltodict.parse(information.text)
     sid = information['response']['sid']
-    # Now get the search status
-    apirequest = apirequest + "/" + sid
-    information = session.post(apirequest, data=data, verify=False)
-    print(information.text)
-    # If the splunk search status is not done, wait 5 seconds then try again
-    sleep(5)
-    information = session.post(apirequest, data=data, verify=False)
-    print(information.text)
-    # todo: now that this is working will need to split out results etc 
+    # Now get the search results
+    results = getsearchresults(sid, sessionkey, splunksettings)
+    return results
 
 
+# Function to get search results from Splunk
+def getsearchresults(sid, sessionkey, splunksettings):
+    # Set up the session
+    session = requests.session()
+    # Update headers
+    session.headers.update({'Authorization': 'Splunk ' + sessionkey})
+    # Now set up the data that we want
+    # Definitely want our results in json
+    data = {
+        "output_mode": "json"
+    }
+    # Set up the api request to get the results. Use the Search ID (sid)
+    apirequest = splunksettings["BaseURL"] + "/services/search/jobs/" + sid + "/results/"
+    # This is a get request
+    information = session.get(apirequest, data=data, verify=False)
+    # If response code 204 returns, assume search is not complete, so try next time
+    print("Status Code: " + str(information.status_code))
+    while information.status_code == 204:
+        print("Results not yet complete, trying again")
+        information = session.get(apirequest, data=data, verify=False)
+        print("Status Code: " + str(information.status_code))
+        sleep(5)
+    print("Results received")
+    # Take the string and turn it into a json object
+    results = json.loads(information.text)
+    # Now print to a file
+    return results["results"]
 
 # Query Splunk to get any messages
 def getsplunkmessages(FilePath):
