@@ -1,7 +1,7 @@
 from pathlib import Path
 import pyfiglet # For a bit of fun :)
 import json
-import binancelibrary
+import binanceAPIlibrary
 import splunk_as_a_database
 from time import sleep
 import datetime
@@ -44,13 +44,17 @@ def main(BinanceFilepath="", SplunkSettings="", TimeWindow=60):
 
     # Now start running the program
     print("Getting crypto prices")
-    cryptopricemovementgathering(binancekeys, splunksettings)
+    while 1:
+        print("Getting Data")
+        cryptopricemovementgathering(binancekeys, splunksettings)
+        print("Waiting 120 seconds")
+        sleep(120)
 
 
 # Function to start collecting data from binance for practice. Set to run each hour.
 def cryptopricemovementgathering(binanceKeys, splunkSettings):
     print("Getting binance data " + str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
-    pricechangedata = binancelibrary.getpricechanges()
+    pricechangedata = binanceAPIlibrary.getpricechanges()
     # Now send binance data to splunk
     print("Sending binance data to Splunk")
     sendtosplunk(pricechangedata, "binance", splunkSettings)
