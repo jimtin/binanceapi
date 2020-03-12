@@ -2,6 +2,7 @@ import splunk_as_a_database
 import binancedatasearching
 import pandas
 import matplotlib.pyplot as pyplot
+import coinbasedatasearching
 
 # Trade Hypothesis 1: If price increases each hour over 2 hours, the next hour will see another price rise
 # Trade Hypothesis 2: If price stops increasing hour over hour, I should sell as it will fall soon
@@ -20,40 +21,12 @@ def gettokenpriceovertime(exchange, token, timeframe, FilePath):
         binancedatasearching.searchbinancedata(token, timeframe, FilePath)
 
     elif exchange == "coinbase":
-        # Use base to get token
-        # Confirm that token exists
-        splunkquery = basequery + " | dedup base | table base"
-        # The list search term will need to know how to search
-        searchterm = "base"
+        exchangedata = coinbasedatasearching.searchcoinbasedata(token, timeframe, FilePath)
+        print(exchangedata)
     else:
         return False
 
 
-
-
-        elif exchange == "coinbase":
-            splunkquery = basequery + " base=" + token + " | table DateTime, amount, base"
-        # Search splunk for the data
-
-        # Return the result of the search
-
-    else:
-        print("Token does not exist, try again")
-        return False
-
-
-
-
-
-# Function to munge coinbase dataframe into one with all the right objects
-def mungecoinbasedata(DataFrame):
-    # Convert the DateTime fields
-    DataFrame["DateTime"] = pandas.to_datetime(DataFrame["DateTime"])
-    # Convert the amount to a float
-    DataFrame["amount"] = pandas.to_numeric(DataFrame["amount"])
-    # Convert the base to a string
-    DataFrame["base"] = DataFrame["base"].astype('|S')
-    return DataFrame
 
 
 # Function to show get a line plot

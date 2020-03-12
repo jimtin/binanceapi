@@ -47,8 +47,8 @@ def main(BinanceFilepath="", SplunkSettings="", TimeWindow=60):
     while 1:
         print("Getting Data")
         cryptopricemovementgathering(binancekeys, splunksettings)
-        print("Waiting 120 seconds")
-        sleep(120)
+        print("Waiting 1200 seconds")
+        sleep(1200)
 
 
 # Function to start collecting data from binance for practice. Set to run each hour.
