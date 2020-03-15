@@ -1,8 +1,8 @@
-import splunk_as_a_database
-import binancedatasearching
+from binance import binancedatasearching
 import pandas
 import matplotlib.pyplot as pyplot
-import coinbasedatasearching
+from coinbase import coinbasedatasearching
+
 
 # Trade Hypothesis 1: If price increases each hour over 2 hours, the next hour will see another price rise
 # Trade Hypothesis 2: If price stops increasing hour over hour, I should sell as it will fall soon
@@ -28,28 +28,6 @@ def gettokenpriceovertime(exchange, token, timeframe, FilePath):
 
 
 
-
-# Function to show get a line plot
-# Assume: Pandas dataframe is the input
-def coinbaselinegraph(DataFrame):
-    # Sort the DataFrame according to dates
-    df = DataFrame.sort_values('DateTime', ascending=True)
-    df["DateTime"] = pandas.to_datetime(df["DateTime"])
-    # Take the DataFrame and set up the plot
-    df.plot(kind="line", x="DateTime", y="amount", color="red")
-    pyplot.show()
-
-
-# Get simple coinbase analysis of single token
-def simplecoinbaseplot(token, timeframe, FilePath):
-    # First get the data
-    coinbasedata = gettokenpriceovertime("coinbase", token, timeframe, FilePath)
-    # Convert into a dataframe
-    df = getdataframe(coinbasedata)
-    # Munge coinbase data
-    mungeddata = mungecoinbasedata(df)
-    # Plot simple line graph
-    coinbaselinegraph(mungeddata)
 
 
 

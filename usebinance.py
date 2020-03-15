@@ -1,11 +1,11 @@
 from pathlib import Path
 import pyfiglet # For a bit of fun :)
 import json
-import binanceAPIlibrary
+from binance import binanceAPIlibrary
 import splunk_as_a_database
 from time import sleep
 import datetime
-import coinbaselibrary
+from coinbase import coinbaselibrary
 
 
 # Get file path for keys
@@ -48,7 +48,7 @@ def main(BinanceFilepath="", SplunkSettings="", TimeWindow=60):
         print("Getting Data")
         cryptopricemovementgathering(binancekeys, splunksettings)
         print("Waiting 1200 seconds")
-        sleep(1200)
+        sleep(120)
 
 
 # Function to start collecting data from binance for practice. Set to run each hour.
