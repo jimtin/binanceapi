@@ -54,6 +54,7 @@ def querysplunk(SearchQuery, FilePath):
     sessionkey = getsplunksessionkey(FilePath)
     data = {
         "search": SearchQuery,
+        "count": "100000",
         "ouput_mode": "json"
     }
     session = requests.session()
@@ -76,7 +77,8 @@ def getsearchresults(sid, sessionkey, splunksettings):
     # Now set up the data that we want
     # Definitely want our results in json
     data = {
-        "output_mode": "json"
+        "output_mode": "json",
+        "count": "100000"
     }
     # Set up the api request to get the results. Use the Search ID (sid)
     apirequest = splunksettings["BaseURL"] + "/services/search/jobs/" + sid + "/results/"
