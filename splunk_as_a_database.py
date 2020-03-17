@@ -42,7 +42,7 @@ def getsplunksettings(FilePath):
 
 
 # Query Splunk to get information
-def querysplunk(SearchQuery, FilePath):
+def querysplunk(SearchQuery, FilePath, sessionkey=""):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     # Ensure that SearchQuery is a string
     SearchQuery = str(SearchQuery)
@@ -50,8 +50,12 @@ def querysplunk(SearchQuery, FilePath):
     splunksettings = getsplunksettings(FilePath)
     # Set up base API
     apirequest = splunksettings["BaseURL"] + "/services/search/jobs/"
-    # Get the session key
-    sessionkey = getsplunksessionkey(FilePath)
+    # If a session key provided, use it, otherwise get it
+    if sessionkey == "":
+        # Get the session key
+        sessionkey = getsplunksessionkey(FilePath)
+    else:
+        sessionkey = sessionkey
     data = {
         "search": SearchQuery,
         "ouput_mode": "json"
@@ -74,13 +78,9 @@ def getsearchresults(sid, sessionkey, splunksettings):
     # Update headers
     session.headers.update({'Authorization': 'Splunk ' + sessionkey})
     # Now set up the data that we want
-    # Definitely want our results in json
-    #data = {
-    #    "output_mode": "json"
-    #}
     # Set up the api request to get the results. Use the Search ID (sid)
+    # Had issues using the data parameter for requests, so put into search string manually
     apirequest = splunksettings["BaseURL"] + "/services/search/jobs/" + sid + "/results/?count=0&output_mode=json"
-    print(apirequest)
     # This is a get request
     information = session.get(apirequest, verify=False)
     # If response code 204 returns, assume search is not complete, so try next time
