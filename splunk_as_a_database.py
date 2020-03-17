@@ -54,7 +54,6 @@ def querysplunk(SearchQuery, FilePath):
     sessionkey = getsplunksessionkey(FilePath)
     data = {
         "search": SearchQuery,
-        "count": "100000",
         "ouput_mode": "json"
     }
     session = requests.session()
@@ -76,25 +75,25 @@ def getsearchresults(sid, sessionkey, splunksettings):
     session.headers.update({'Authorization': 'Splunk ' + sessionkey})
     # Now set up the data that we want
     # Definitely want our results in json
-    data = {
-        "output_mode": "json",
-        "count": "100000"
-    }
+    #data = {
+    #    "output_mode": "json"
+    #}
     # Set up the api request to get the results. Use the Search ID (sid)
-    apirequest = splunksettings["BaseURL"] + "/services/search/jobs/" + sid + "/results/"
+    apirequest = splunksettings["BaseURL"] + "/services/search/jobs/" + sid + "/results/?count=0&output_mode=json"
+    print(apirequest)
     # This is a get request
-    information = session.get(apirequest, data=data, verify=False)
+    information = session.get(apirequest, verify=False)
     # If response code 204 returns, assume search is not complete, so try next time
     print("Status Code: " + str(information.status_code))
     while information.status_code == 204:
         print("Results not yet complete, trying again")
-        information = session.get(apirequest, data=data, verify=False)
+        information = session.get(apirequest, verify=False)
         print("Status Code: " + str(information.status_code))
         sleep(5)
     print("Results received")
     # Take the string and turn it into a json object
     results = json.loads(information.text)
-    # Now print to a file
+    # Return results
     return results["results"]
 
 # Query Splunk to get any messages
